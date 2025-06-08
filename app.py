@@ -1,15 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from yt_dlp import YoutubeDL
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/api/download', methods=['POST'])
 def download():
     data = request.get_json()
     url = data.get('url')
-
     if not url:
         return jsonify({'error': 'No URL provided'}), 400
 
