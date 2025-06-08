@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Video Downloader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0b0033;
+      color: white;
+      text-align: center;
+      padding-top: 100px;
+    }
+    h1 {
+      font-size: 2.5em;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+      border-radius: 5px;
+      border: none;
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+    }
+    .link {
+      margin: 10px 0;
+    }
+    .link a {
+      color: #00ffcc;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>YouTube Video Downloader</h1>
+  <input type="text" id="videoUrl" placeholder="Paste your video link here" />
+  <button onclick="fetchDownload()">Download →</button>
+
+  <div id="result"></div>
+
+  <script>
+    async function fetchDownload() {
+      const url = document.getElementById('videoUrl').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = 'Scanning...';
+
+      try {
+        const res = await fetch('http://localhost:5000/api/download', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          resultDiv.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+          return;
+        }
+
+        let html = `<h3>${data.title}</h3><img src="${data.thumbnail}" width="320"/><br/><br/>`;
+
+        data.formats.slice(0, 5).forEach(format => {
+          html += `
+            <div class="link">
+              <a href="${format.url}" target="_blank">
+                Download (${format.resolution || format.format_note || format.ext})
+              </a>
+            </div>
+          `;
+        });
+
+        resultDiv.innerHTML = html;
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">Request failed.</p>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
